@@ -6,18 +6,18 @@ namespace Battleship
     {
         public void Play()
         {
-            var battleShips = GetPlayerBattleShips();
+            System.Console.WriteLine($"Welcome to Battleship game.{Environment.NewLine}Enter player name");
+            var playerName = Console.ReadLine();
+            var player = new Player(playerName);
+            var playerShipCount = GetPlayersShips();
+            player.PlaceShipsOnBoard(playerShipCount);
 
-            var board = new Board();
-            PlaceBattleShipsOnBoard(battleShips, board);
-
-            System.Console.WriteLine("Player 2 fire at will.");
-            Fire(board);
+            TakeFire(player);
         }
 
-        private int GetPlayerBattleShips()
+        private int GetPlayersShips()
         {
-            Console.WriteLine("Welcome player, how many battleships you want to play with?");
+            Console.WriteLine("How many battleships you want to play with?");
             int result = 0;
             var input = Console.ReadLine();
             if (!int.TryParse(input, out result))
@@ -27,42 +27,7 @@ namespace Battleship
             return result;
         }
 
-        private void PlaceBattleShipsOnBoard(int shipCount, Board board)
-        {
-            for (int nIndex = 0; nIndex < shipCount; nIndex++)
-            {
-                System.Console.WriteLine($"Enter the co-ordinates(x,y) to place ship number: {nIndex + 1}");
-                var input = Console.ReadLine();
-                var coordinate = input.Split(',');
-
-                if (coordinate.Length < 2
-                    || !int.TryParse(coordinate[0], out var x)
-                    || !int.TryParse(coordinate[1], out var y))
-                {
-                    throw new InvalidOperationException("Invalid input, please try again!");
-                }
-
-                System.Console.WriteLine("Enter ship length (1-10)");
-                input = Console.ReadLine();
-                if (!int.TryParse(input, out var shipLength))
-                {
-                    throw new InvalidOperationException("Invalid ship length");
-                }
-
-                var boardCoordinate = new Coordinate(x, y);
-                var ship = new Ship(shipLength);
-                if (board.PlaceShipOnBoard(boardCoordinate, ship))
-                {
-                    System.Console.WriteLine("Ship successfully placed on board");
-                }
-                else
-                {
-                    throw new InvalidOperationException("Unable to place ship on board");
-                }
-            }
-        }
-
-        private void Fire(Board board)
+        private void TakeFire(Player player)
         {
             do
             {
@@ -78,15 +43,15 @@ namespace Battleship
                 else
                 {
                     var attackCoordinates = new Coordinate(x, y);
-                    var (isItAHit, hasShipSunk) = board.IsItAHit(attackCoordinates);
+                    var (isItAHit, isSunk) = player.TakeHit(attackCoordinates);
 
                     if (isItAHit)
                     {
-                        var shipStatusMessage = hasShipSunk ? "You sunk the ship" : "";
+                        var shipStatusMessage = isSunk ? "You sunk the ship" : "";
                         System.Console.WriteLine($"Yay! It's a hit.{shipStatusMessage}");
-                        if(board.HasPlayerLostYet())
+                        if (player.DidILoose())
                         {
-                            System.Console.WriteLine($"Player lost all his ships.{Environment.NewLine}Game over");
+                            System.Console.WriteLine($"{player.PlayerName} lost all his ships.{Environment.NewLine}Game over");
                             break;
                         }
                     }

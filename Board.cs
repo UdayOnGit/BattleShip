@@ -1,71 +1,70 @@
-using System.Collections.Generic;
-using System.Linq;
+using System;
 
 namespace Battleship
 {
     public class Board
     {
-        private const int BoardDimension = 10;
-        private List<Ship> shipsOnBoard;
-
-        private Cell[,] boardCoordinates;
+        private int BoardDimension = 10;
+        private Cell[,] _board;
 
         public Board()
         {
             InitializeBoard();
         }
 
-        public bool PlaceShipOnBoard(Coordinate cooordinate, Ship ship)
-        {
-            List<Cell> cells = new List<Cell>();
-            for (int index = 0; index < ship.Length; index++)
-            {
-                cells.Add(boardCoordinates[cooordinate.X + index, cooordinate.Y]);
-            }
-            if (cells.Any(x => x.Ship != null))
-            {
-                return false;
-            }
-            foreach (var cell in cells)
-            {
-                cell.Ship = ship;
-            }
-            shipsOnBoard.Add(ship);
-
-            return true;
-        }
-
-        public (bool isItAHit, bool didTheShipSink) IsItAHit(Coordinate coordinate)
-        {
-            var cell = boardCoordinates[coordinate.X, coordinate.Y];
-            var hit = cell.Ship != null;
-            if (hit)
-            {
-                cell.Ship.Hit++;
-                var ShipSank = cell.Ship.DidShipSink();
-                return (hit, ShipSank);
-            }
-            return (false, false);
-        }
-
-        public bool HasPlayerLostYet() => shipsOnBoard.All(x => x.DidShipSink());
-
         private void InitializeBoard()
         {
-            shipsOnBoard = new List<Ship>();
-            boardCoordinates = new Cell[BoardDimension, BoardDimension];
-            for (int x = 0; x < boardCoordinates.GetLength(0); x++)
+            _board = new Cell[BoardDimension, BoardDimension];
+            for (int x = 0; x < BoardDimension; x++)
             {
-                for (int y = 0; y < boardCoordinates.GetLength(1); y++)
+                for (int y = 0; y < BoardDimension; y++)
                 {
-                    boardCoordinates[x, y] = new Cell
+                    _board[x, y] = new Cell
                     {
                         CellCoordinate = new Coordinate(x, y),
-                        Ship = null,
-                        IsCellAttackedEarlier = AttackStatus.NotYetAttacked
+                        IsOccupied = false
                     };
                 }
             }
         }
+
+        public void PlaceShipOnBoard(Coordinate coordinate, ShipDirection direction, Ship ship)
+        {
+            var cell = _board[coordinate.X, coordinate.Y];
+            if (IsShipWithinBoardBounds(coordinate, direction, ship))
+            {
+                if (direction == ShipDirection.Vertical)
+                {
+                    for (int index = 0; index < ship.Length; index++)
+                    {
+                        int verticalIndex = coordinate.Y + index;
+                        _board[coordinate.X, verticalIndex].IsOccupied = true;
+                        _board[coordinate.X, verticalIndex].ShipName = ship.Name;
+                    }
+                }
+                else
+                {
+                    for (int index = 0; index < ship.Length; index++)
+                    {
+                        int horizontalIndex = coordinate.X + index;
+                        _board[horizontalIndex, coordinate.Y].IsOccupied = true;
+                        _board[horizontalIndex, coordinate.Y].ShipName = ship.Name;
+                    }
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("Ship placed outside the board");
+            }
+
+        }
+
+        private bool IsShipWithinBoardBounds(Coordinate initialCoordinate, ShipDirection direction, Ship ship)
+        {
+            var coordinate = direction == ShipDirection.Vertical ? initialCoordinate.Y: initialCoordinate.X;
+            return BoardDimension > coordinate + ship.Length;
+        }
+
+        public Cell GetBoardCell(Coordinate coordinate) => _board[coordinate.X, coordinate.Y];
     }
 }

@@ -1,8 +1,8 @@
 namespace Battleship
 {
-    public enum AttackStatus
+    public enum ShipDirection
     {
-        NotYetAttacked,
-        AlreadyAttacked
+        Vertical,
+        Horizontal
     }
 }
