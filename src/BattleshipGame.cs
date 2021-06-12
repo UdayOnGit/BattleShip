@@ -5,11 +5,16 @@ namespace Battleship
 {
     public class BattleshipGame
     {
+        private readonly IConsole _console;
+        public BattleshipGame(IConsole console)
+        {
+            _console = console;
+        }
         public void Play()
         {
-            System.Console.WriteLine($"Welcome to Battleship game.{Environment.NewLine}Enter player name");
+            _console.WriteLine($"Welcome to Battleship game.{Environment.NewLine}Enter player name");
             var playerName = Console.ReadLine();
-            var player = new Player(playerName);
+            var player = new Player(playerName, _console);
             var playerShipCount = GetPlayersShips();
             player.PlaceShipsOnBoard(playerShipCount);
 
@@ -18,7 +23,7 @@ namespace Battleship
 
         private int GetPlayersShips()
         {
-            Console.WriteLine("How many battleships you want to play with?");
+            _console.WriteLine("How many battleships you want to play with?");
             int result = 0;
             var input = Console.ReadLine();
             if (!int.TryParse(input, out result))
@@ -32,14 +37,14 @@ namespace Battleship
         {
             do
             {
-                System.Console.WriteLine("Enter attack coordinates as x,y. Hit Esc key to exit.");
+                _console.WriteLine("Enter attack coordinates as x,y. Hit Esc key to exit.");
                 var input = Console.ReadLine();
                 var coordinates = input.Split(',');
                 if (coordinates.Length < 2
                     || !int.TryParse(coordinates[0], out var x)
                     || !int.TryParse(coordinates[1], out var y))
                 {
-                    System.Console.WriteLine("Invalid input, please try again");
+                    _console.WriteLine("Invalid input, please try again");
                 }
                 else
                 {
@@ -49,16 +54,16 @@ namespace Battleship
                     if (isItAHit)
                     {
                         var shipStatusMessage = isSunk ? "You sunk the ship" : "";
-                        System.Console.WriteLine($"Yay! It's a hit.{shipStatusMessage}");
+                        _console.WriteLine($"Yay! It's a hit.{shipStatusMessage}");
                         if (player.DidILoose())
                         {
-                            System.Console.WriteLine($"{player.PlayerName} lost all his ships.{Environment.NewLine}Game over");
+                            _console.WriteLine($"{player.PlayerName} lost all his ships.{Environment.NewLine}Game over");
                             break;
                         }
                     }
                     else
                     {
-                        System.Console.WriteLine("Nah, it's a miss");
+                        _console.WriteLine("Nah, it's a miss");
                     }
                 }
 

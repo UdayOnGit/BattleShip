@@ -4,7 +4,8 @@
     {
         static void Main(string[] args)
         {
-            var game = new BattleshipGame();
+            var console = new ConsoleWrapper();
+            var game = new BattleshipGame(console);
             game.Play();
         }
     }

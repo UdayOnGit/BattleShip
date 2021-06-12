@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using System;
 using System.Linq;
 using Battleship.Models;
+using System;
 
 namespace Battleship
 {
@@ -11,18 +11,20 @@ namespace Battleship
         private Board _board;
         private List<Ship> _ships;
         private ShipDirection _playersShipDirection;
+        private IConsole _console;
 
-        public Player(string name)
+        public Player(string name, IConsole console)
         {
             PlayerName = name;
             _ships = new List<Ship>();
             _board = new Board();
+            _console = console;
         }
 
         public void PlaceShipsOnBoard(int shipCount)
         {
-            System.Console.WriteLine("How do you want to align ships on board (Vertical/Horizontal)");
-            var direction = Console.ReadLine();
+            _console.WriteLine("How do you want to align ships on board (Vertical/Horizontal)");
+            var direction = _console.ReadLine();
             if (!Enum.TryParse(direction, out _playersShipDirection))
             {
                 throw new InvalidOperationException("Invalid ship direction");
@@ -30,8 +32,8 @@ namespace Battleship
 
             for (int nIndex = 0; nIndex < shipCount; nIndex++)
             {
-                System.Console.WriteLine($"Enter the co-ordinates(x,y) to place ship number: {nIndex + 1}");
-                var input = Console.ReadLine();
+                _console.WriteLine($"Enter the co-ordinates(x,y) to place ship number: {nIndex + 1}");
+                var input = _console.ReadLine();
                 var coordinate = input.Split(',');
 
                 if (coordinate.Length < 2
@@ -43,13 +45,13 @@ namespace Battleship
                 var boardCoordinate = new Coordinate(x, y);
 
                 System.Console.WriteLine("Enter ship length (1-10)");
-                input = Console.ReadLine();
+                input = _console.ReadLine();
                 if (!int.TryParse(input, out var shipLength))
                 {
                     throw new InvalidOperationException("Invalid ship length");
                 }
                 System.Console.WriteLine("Enter ship name");
-                var shipName = Console.ReadLine();
+                var shipName = _console.ReadLine();
                 var ship = new Ship(shipLength, shipName);
 
                 _board.PlaceShipOnBoard(boardCoordinate, _playersShipDirection, ship);
