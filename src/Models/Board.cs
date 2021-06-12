@@ -30,7 +30,6 @@ namespace Battleship.Models
 
         public void PlaceShipOnBoard(Coordinate coordinate, ShipDirection direction, Ship ship)
         {
-            var cell = _board[coordinate.X, coordinate.Y];
             if (IsShipWithinBoardBounds(coordinate, direction, ship))
             {
                 if (direction == ShipDirection.Vertical)
@@ -61,6 +60,11 @@ namespace Battleship.Models
 
         private bool IsShipWithinBoardBounds(Coordinate initialCoordinate, ShipDirection direction, Ship ship)
         {
+            if(initialCoordinate.X < 0 || initialCoordinate.Y < 0)
+            {
+                return false;
+            }
+            
             var coordinate = direction == ShipDirection.Vertical ? initialCoordinate.Y: initialCoordinate.X;
             return BoardDimension > coordinate + ship.Length;
         }
